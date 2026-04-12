@@ -1,6 +1,8 @@
+@import 'bootstrap/dist/css/bootstrap.min.css';
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
+  --text: #1a1a1a;
+  --text-h: #000;
   --bg: #fff;
   --border: #e5e4e7;
   --code-bg: #f4f3ec;
