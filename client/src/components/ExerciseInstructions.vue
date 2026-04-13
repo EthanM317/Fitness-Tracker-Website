@@ -142,10 +142,13 @@ exercises: {
 
 .exercise-section h2 {
   margin-top: 0;
+  font-size: 2 rem; 
   color: var(--green-1);
   border-bottom: 1px solid #444;
-  padding-bottom: 10px;
-  margin-bottom: 15px;
+  padding-bottom: 12px;
+  margin-bottom: 20px;
+  letter-spacing: 0.5px; 
+  font-weight: 700;
 }
 
 .content-wrapper {
