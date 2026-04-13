@@ -30,10 +30,23 @@
         </div>
       </div>
 
+      <div class="exercise-link-box" v-if="!isAddingCustom && instructionLink">
+        <router-link :to="instructionLink" target="_blank" class="info-link">
+          View {{ form.name }} Guide
+        </router-link>
+      </div>
+
       <div class="form-group" v-if="isAddingCustom">
         <label for="customName">New Exercise Name:</label>
-        <div class="input-group">
-          <input type="text" id="customName" v-model="newExerciseName" placeholder="Example: Burpees">
+          <div class="input-group">
+          <input 
+            type="text" 
+            id="customName" 
+            ref="customNameInput" 
+            v-model="newExerciseName" 
+            placeholder="Custom Exercise Name Here!"
+            @input="clearError"
+          >
           <button type="button" @click="saveCustomExercise">Save</button>
           <button type="button" class="btn-cancel" @click="cancelCustomExercise">Cancel</button>
         </div>
@@ -51,6 +64,7 @@
         <label for="weight">Weight (lbs):</label>
         <input type="number" id="weight" v-model.number="form.weight" min="0" step="5" required>
       </div>
+      
       <div class="form-group" v-if="!date">
         <label for="date">Date:</label>
         <input type="date" id="date" v-model="form.date" required>
@@ -72,12 +86,21 @@ export default {
   },
   data() {
     return {
-      defaultExercises: [
-        "Bench Press",
-        "Push-ups",
-        "Squats",
-        "Pull-ups"
-      ],
+      exercisePresets: {
+        "Bench Press":    { sets: 3, reps: 10, weight: 135 },
+        "Bicep Curls":    { sets: 3, reps: 12, weight: 25 },
+        "Cycling":        { sets: 1, reps: 1,  weight: 0 },
+        "Deadlift":       { sets: 3, reps: 5,  weight: 225 },
+        "Plank":          { sets: 2, reps: 1,  weight: 0 },
+        "Pull-ups":       { sets: 3, reps: 10, weight: 0 },
+        "Push-ups":       { sets: 5, reps: 20, weight: 0 },
+        "Running":        { sets: 1, reps: 1,  weight: 0 },
+        "Shoulder Press": { sets: 3, reps: 10, weight: 45 },
+        "Squats":         { sets: 3, reps: 8,  weight: 185 },
+        "Tricep Dips":    { sets: 3, reps: 12, weight: 0 },
+        "Walking":        { sets: 1, reps: 1,  weight: 0 }
+      },
+      
       customExercises: [], 
       isAddingCustom: false, 
       newExerciseName: '', 
@@ -86,15 +109,29 @@ export default {
         sets: 0,
         reps: 0,
         weight: 0,
-        date: this.date || new Date().toISOString().split('T')[0]
+        date: this.date || new Date().toLocaleDateString('en-CA')
       }
     }
   },
   computed: {
+    defaultExercises() {
+      return Object.keys(this.exercisePresets).sort();
+    },
     isCustomSelected() {
       return this.customExercises.includes(this.form.name);
+    },
+    selectedPresetData() {
+      return this.exercisePresets[this.form.name] || null;
+    },
+    instructionLink() {
+      if (this.selectedPresetData && this.form.name) {
+        const hash = this.form.name.toLowerCase().replace(/\s+/g, '-');
+        return `/instructions#${hash}`;
+      }
+      return null;
     }
   },
+
   watch: {
     date(newDate) {
       this.form.date = newDate
@@ -111,21 +148,50 @@ export default {
       if (this.form.name === 'ADD_NEW') {
         this.isAddingCustom = true;
         this.form.name = ''; 
+        this.form.sets = 0;
+        this.form.reps = 0;
+        this.form.weight = 0;
+      } 
+      else if (this.exercisePresets[this.form.name]) {
+        const preset = this.exercisePresets[this.form.name];
+        this.form.sets = preset.sets;
+        this.form.reps = preset.reps;
+        this.form.weight = preset.weight;
       }
     },
+
     saveCustomExercise() {
       const name = this.newExerciseName.trim();
+      const inputEl = this.$refs.customNameInput;
+
       if (!name) return; 
-      
-      if (!this.defaultExercises.includes(name) && !this.customExercises.includes(name)) {
-        this.customExercises.push(name);
-        localStorage.setItem('customExercises', JSON.stringify(this.customExercises));
+      const searchName = name.toLowerCase();
+      const isDuplicate = 
+        this.defaultExercises.some(ex => ex.toLowerCase() === searchName) ||
+        this.customExercises.some(ex => ex.toLowerCase() === searchName);
+
+      if (isDuplicate) {
+        inputEl.setCustomValidity(`An exercise named "${name}" already exists.`);
+        inputEl.reportValidity();
+        return; 
       }
+      this.customExercises.push(name);
+      localStorage.setItem('customExercises', JSON.stringify(this.customExercises));
       
       this.form.name = name;
       this.isAddingCustom = false;
       this.newExerciseName = '';
+      this.form.sets = 0;
+      this.form.reps = 0;
+      this.form.weight = 0;
     },
+
+    clearError() {
+      if (this.$refs.customNameInput) {
+        this.$refs.customNameInput.setCustomValidity('');
+      }
+    },
+
     cancelCustomExercise() {
       this.isAddingCustom = false;
       this.newExerciseName = '';
@@ -146,7 +212,7 @@ export default {
         sets: 0,
         reps: 0,
         weight: 0,
-        date: this.date || new Date().toISOString().split('T')[0]
+        date: this.date || new Date().toLocaleDateString('en-CA')
       }
     }
   }
@@ -220,5 +286,29 @@ button:hover {
 
 .btn-cancel:hover {
   background-color: var(--border);
+}
+
+.exercise-link-box {
+  background-color: rgba(255, 255, 255, 0.03);
+  border-left: 3px solid var(--green-1);
+  padding: 10px 15px;
+  margin: 10px 0 20px 0;
+  border-radius: 0 4px 4px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.info-link {
+  color: var(--green-1);
+  text-decoration: none;
+  font-weight: bold;
+  font-size: 0.95em;
+  transition: opacity 0.2s ease;
+}
+
+.info-link:hover {
+  text-decoration: underline;
+  opacity: 0.8;
 }
 </style>
