@@ -78,7 +78,6 @@ export default {
 }
 
 .exercise-form h2 {
-  color: #1a1a1a;
   font-size: 1.5em;
   font-weight: bold;
   margin-bottom: 15px;
@@ -91,7 +90,6 @@ export default {
 label {
   display: block;
   margin-bottom: 5px;
-  color: #1a1a1a;
   font-weight: 500;
 }
 
@@ -99,13 +97,11 @@ input {
   width: 100%;
   padding: 8px;
   box-sizing: border-box;
-  color: #1a1a1a;
-  background-color: #fff;
-  border: 1px solid #ccc;
+  border: 1px solid var(--border);
 }
 
 button {
-  background-color: #4CAF50;
+  background-color: var(--green-1);
   color: white;
   padding: 10px 15px;
   border: none;
@@ -113,6 +109,6 @@ button {
 }
 
 button:hover {
-  background-color: #45a049;
+  background-color: var(--green-2);
 }
 </style>

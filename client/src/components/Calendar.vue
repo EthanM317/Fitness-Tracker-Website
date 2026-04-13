@@ -96,12 +96,7 @@ export default {
   align-items: center;
   gap: 12px;
   font-size: 2.5em;
-  color: #1a1a1a;
   font-weight: bold;
-}
-
-.calendar h1 svg {
-  color: #1a1a1a;
 }
 
 .calendar-header {
@@ -120,18 +115,18 @@ export default {
 .day-header {
   font-weight: bold;
   padding: 10px;
-  background-color: #f0f0f0;
+  background-color: var(--code-bg);
+  border: 1px solid var(--text);
 }
 
 .calendar-day {
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--text);
   cursor: pointer;
   min-height: 60px;
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
-  color: #1a1a1a;
 }
 
 .calendar-day:hover {
@@ -144,5 +139,6 @@ export default {
 
 .today {
   background-color: #ffff99;
+  color: var(--red-1);
 }
 </style>

@@ -91,7 +91,7 @@ export default {
 }
 
 .day-view h1 {
-  color: #1a1a1a;
+  color: var(--text-h);
   font-size: 2em;
   font-weight: bold;
   margin-bottom: 20px;
@@ -100,13 +100,13 @@ export default {
 button {
   margin-bottom: 20px;
   padding: 10px 15px;
-  background-color: #4CAF50;
+  background-color: var(--green-1);
   color: white;
   border: none;
   cursor: pointer;
 }
 
 button:hover {
-  background-color: #45a049;
+  background-color: var(--green-2);
 }
 </style>

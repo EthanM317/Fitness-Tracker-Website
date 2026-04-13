@@ -33,7 +33,7 @@ export default {
 .exercise-list {
   margin: 20px auto;
   max-width: 800px;
-  color: #1a1a1a;
+  color: var(--text);
 }
 
 .exercise-item {
@@ -41,14 +41,17 @@ export default {
   justify-content: space-between;
   align-items: center;
   padding: 10px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border);
   margin-bottom: 10px;
-  background-color: #f9f9f9;
-  color: #1a1a1a;
+  background-color: var(--code-bg);
+}
+
+.exercise-info {
+  margin-right: 10px;
 }
 
 .delete-btn {
-  background-color: #f44336;
+  background-color: var(--red-1);
   color: white;
   border: none;
   padding: 5px 10px;
@@ -56,6 +59,6 @@ export default {
 }
 
 .delete-btn:hover {
-  background-color: #d32f2f;
+  background-color: var(--red-2);
 }
 </style>
