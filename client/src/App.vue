@@ -1,6 +1,7 @@
 <script>
 import { RouterLink, RouterView } from 'vue-router'
 import AppLogo from './components/AppLogo.vue'
+
 export default {
   components: {
     AppLogo
@@ -14,6 +15,7 @@ export default {
     <nav>
       <AppLogo />
       <RouterLink to="/">Calendar</RouterLink>
+      <RouterLink to="/instructions">Instructions</RouterLink>
     </nav>
     <router-view />
   </div>
@@ -22,16 +24,17 @@ export default {
 <style>
 body {
   background-color: var(--code-bg);
+  margin: 0;
 }
 
 nav {
   display: flex;
+  align-items: center;
   background-color: var(--social-bg);
   padding: 12px;
   margin: 12px;
   border-radius: 30px;
-  border-width: 1px;
-  border-color: var(--border);
+  border: 1px solid var(--border);
   text-align: left;
 }
 
@@ -54,5 +57,7 @@ nav a:hover {
   color: #2c3e50;
   background-color: var(--bg);
   width: 75%;
+  margin: 0 auto;
+  min-height: 100vh;
 }
 </style>
