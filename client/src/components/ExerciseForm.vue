@@ -1,11 +1,44 @@
 <template>
   <div class="exercise-form">
-    <h2>Add Exercise</h2>
+    <h2>Select Your Exercise</h2>
     <form @submit.prevent="submitForm">
-      <div class="form-group">
-        <label for="name">Exercise Name:</label>
-        <input type="text" id="name" v-model="form.name" required>
+      
+      <div class="form-group" v-if="!isAddingCustom">
+        <label for="name">Exercise Type:</label>
+        <div class="input-group">
+          <select id="name" v-model="form.name" @change="handleSelectChange" required>
+            <option disabled value="">Select an exercise</option>
+            
+            <optgroup label="Default Exercises">
+              <option v-for="exercise in defaultExercises" :key="exercise" :value="exercise">
+                {{ exercise }}
+              </option>
+            </optgroup>
+            
+            <optgroup label="Custom Exercises" v-if="customExercises.length > 0">
+              <option v-for="exercise in customExercises" :key="exercise" :value="exercise">
+                {{ exercise }}
+              </option>
+            </optgroup>
+            
+            <option value="ADD_NEW">➕ Add Custom Exercise...</option>
+          </select>
+          
+          <button type="button" class="btn-danger" v-if="isCustomSelected" @click="deleteCustomExercise" title="Delete custom exercise">
+            Delete
+          </button>
+        </div>
       </div>
+
+      <div class="form-group" v-if="isAddingCustom">
+        <label for="customName">New Exercise Name:</label>
+        <div class="input-group">
+          <input type="text" id="customName" v-model="newExerciseName" placeholder="Example: Burpees">
+          <button type="button" @click="saveCustomExercise">Save</button>
+          <button type="button" class="btn-cancel" @click="cancelCustomExercise">Cancel</button>
+        </div>
+      </div>
+
       <div class="form-group">
         <label for="sets">Sets:</label>
         <input type="number" id="sets" v-model.number="form.sets" min="0" required>
@@ -22,7 +55,8 @@
         <label for="date">Date:</label>
         <input type="date" id="date" v-model="form.date" required>
       </div>
-      <button type="submit">Add Exercise</button>
+      
+      <button type="submit" v-if="!isAddingCustom">Add Exercise</button>
     </form>
   </div>
 </template>
@@ -38,6 +72,15 @@ export default {
   },
   data() {
     return {
+      defaultExercises: [
+        "Bench Press",
+        "Push-ups",
+        "Squats",
+        "Pull-ups"
+      ],
+      customExercises: [], 
+      isAddingCustom: false, 
+      newExerciseName: '', 
       form: {
         name: '',
         sets: 0,
@@ -47,12 +90,52 @@ export default {
       }
     }
   },
+  computed: {
+    isCustomSelected() {
+      return this.customExercises.includes(this.form.name);
+    }
+  },
   watch: {
     date(newDate) {
       this.form.date = newDate
     }
   },
+  mounted() {
+    const saved = localStorage.getItem('customExercises');
+    if (saved) {
+      this.customExercises = JSON.parse(saved);
+    }
+  },
   methods: {
+    handleSelectChange() {
+      if (this.form.name === 'ADD_NEW') {
+        this.isAddingCustom = true;
+        this.form.name = ''; 
+      }
+    },
+    saveCustomExercise() {
+      const name = this.newExerciseName.trim();
+      if (!name) return; 
+      
+      if (!this.defaultExercises.includes(name) && !this.customExercises.includes(name)) {
+        this.customExercises.push(name);
+        localStorage.setItem('customExercises', JSON.stringify(this.customExercises));
+      }
+      
+      this.form.name = name;
+      this.isAddingCustom = false;
+      this.newExerciseName = '';
+    },
+    cancelCustomExercise() {
+      this.isAddingCustom = false;
+      this.newExerciseName = '';
+      this.form.name = '';
+    },
+    deleteCustomExercise() {
+      this.customExercises = this.customExercises.filter(ex => ex !== this.form.name);
+      localStorage.setItem('customExercises', JSON.stringify(this.customExercises));
+      this.form.name = ''; 
+    },
     submitForm() {
       this.$emit('add-exercise', { ...this.form })
       this.resetForm()
@@ -74,7 +157,6 @@ export default {
 .exercise-form {
   margin: 20px auto;
   max-width: 400px;
-  color: #1a1a1a;
 }
 
 .exercise-form h2 {
@@ -87,17 +169,26 @@ export default {
   margin-bottom: 15px;
 }
 
+.input-group {
+  display: flex;
+  gap: 10px;
+}
+
 label {
   display: block;
   margin-bottom: 5px;
   font-weight: 500;
 }
 
-input {
+input, select {
   width: 100%;
   padding: 8px;
   box-sizing: border-box;
   border: 1px solid var(--border);
+  background-color: var(--code-bg);
+  color: var(--text);
+  font-family: inherit;
+  font-size: inherit;
 }
 
 button {
@@ -106,9 +197,28 @@ button {
   padding: 10px 15px;
   border: none;
   cursor: pointer;
+  white-space: nowrap;
 }
 
 button:hover {
   background-color: var(--green-2);
+}
+
+.btn-danger {
+  background-color: var(--red-1);
+}
+
+.btn-danger:hover {
+  background-color: var(--red-2);
+}
+
+.btn-cancel {
+  background-color: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+}
+
+.btn-cancel:hover {
+  background-color: var(--border);
 }
 </style>
