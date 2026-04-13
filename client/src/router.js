@@ -2,6 +2,7 @@ import Vue from 'vue'
 import VueRouter from 'vue-router'
 import Calendar from './components/Calendar.vue'
 import DayView from './components/DayView.vue'
+import ExerciseInstructions from './components/ExerciseInstructions.vue'
 
 Vue.use(VueRouter)
 
@@ -16,12 +17,23 @@ const routes = [
     name: 'DayView',
     component: DayView,
     props: true
+  },
+  {
+    path: '/instructions',
+    name: 'Instructions',
+    component: ExerciseInstructions
   }
 ]
 
 const router = new VueRouter({
   mode: 'history',
-  routes
+  routes,
+  scrollBehavior(to, from, savedPosition) {
+    if (to.hash) {
+      return { selector: to.hash, behavior: 'smooth' }
+    }
+    return { x: 0, y: 0 }
+  }
 })
 
 export default router
