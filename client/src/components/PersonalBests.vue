@@ -15,7 +15,17 @@
         class="pb-card"
         :class="{ 'glowing': recentlyBroken === exercise }"
       >
-        <h2>{{ exercise }}</h2>
+        <div class="card-header">
+          <h2>{{ exercise }}</h2>
+          <button 
+            v-if="customExercises.includes(exercise)" 
+            @click="openDeleteModal(exercise)" 
+            class="btn-delete-custom"
+            title="Remove Custom Exercise"
+          >
+            ✕
+          </button>
+        </div>
         
         <div v-if="personalBests[exercise] === null" class="unset-state">
           <p>No record set yet.</p>
@@ -111,6 +121,18 @@
       </div>
     </div>
 
+    <div v-if="showDeleteModal" class="modal-overlay" @click.self="closeDeleteModal">
+      <div class="modal-content">
+        <h2>Remove Exercise?</h2>
+        <p class="modal-subtitle alert-text">Are you sure you want to completely remove "{{ exerciseToDelete }}"? This cannot be undone.</p>
+        
+        <div class="modal-actions">
+          <button @click="closeDeleteModal" class="btn-back">Cancel</button>
+          <button @click="confirmDelete" class="btn-danger">Yes, Remove</button>
+        </div>
+      </div>
+    </div>
+
     <div v-if="showAlertModal" class="modal-overlay" @click.self="closeAlertModal">
       <div class="modal-content alert-modal">
         <h2>Keep Going!</h2>
@@ -155,6 +177,7 @@ export default {
         "Tricep Dips",
         "Walking"
       ],
+      customExercises: [],
       exerciseUnits: {
         "Bench Press": "lbs",
         "Bicep Curls": "lbs",
@@ -199,6 +222,9 @@ export default {
 
       showResetModal: false,
       exerciseToReset: null,
+
+      showDeleteModal: false,
+      exerciseToDelete: null,
 
       showAlertModal: false,
       alertMessage: "",
@@ -250,6 +276,7 @@ export default {
       }
 
       this.exercises.push(name);
+      this.customExercises.push(name);
       this.exerciseUnits[name] = unit;
       this.personalBests[name] = null;
       this.newAttempts[name] = null;
@@ -312,6 +339,27 @@ export default {
         this.personalBests[this.exerciseToReset] = null;
         this.newAttempts[this.exerciseToReset] = null;
         this.closeResetModal();
+      }
+    },
+
+    openDeleteModal(exercise) {
+      this.exerciseToDelete = exercise;
+      this.showDeleteModal = true;
+    },
+    closeDeleteModal() {
+      this.showDeleteModal = false;
+      this.exerciseToDelete = null;
+    },
+    confirmDelete() {
+      if (this.exerciseToDelete) {
+        this.exercises = this.exercises.filter(e => e !== this.exerciseToDelete);
+        this.customExercises = this.customExercises.filter(e => e !== this.exerciseToDelete);
+        
+        delete this.exerciseUnits[this.exerciseToDelete];
+        delete this.personalBests[this.exerciseToDelete];
+        delete this.newAttempts[this.exerciseToDelete];
+        
+        this.closeDeleteModal();
       }
     },
 
@@ -442,15 +490,38 @@ export default {
   min-height: 200px; 
 }
 
-.pb-card h2 {
-  margin-top: 0;
-  color: var(--green-1);
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   border-bottom: 1px solid #444;
   padding-bottom: 10px;
   margin-bottom: 15px;
+}
+
+.pb-card h2 {
+  margin: 0;
+  color: var(--green-1);
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: 0.5px;
+}
+
+.btn-delete-custom {
+  background: none;
+  border: none;
+  color: var(--text);
+  opacity: 0.4;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 0;
+  transition: opacity 0.2s ease, color 0.2s ease;
+  line-height: 1;
+}
+
+.btn-delete-custom:hover {
+  color: #ff4d4d;
+  opacity: 1;
 }
 
 .unset-state, .set-state {
