@@ -2,7 +2,10 @@
   <div class="pb-page main-container">
     <header class="page-header">
       <h1>Personal Bests</h1>
-      <router-link to="/" class="btn-back">Back to Calendar</router-link>
+      <div class="header-actions">
+        <button @click="openCustomModal" class="btn-primary btn-sm">+ Add Custom</button>
+        <router-link to="/" class="btn-back">Back to Calendar</router-link>
+      </div>
     </header>
 
     <div class="pb-grid">
@@ -39,6 +42,42 @@
           </div>
         </div>
       </section>
+    </div>
+
+    <div v-if="showCustomModal" class="modal-overlay" @click.self="closeCustomModal">
+      <div class="modal-content">
+        <h2>Add Custom Exercise</h2>
+        <p class="modal-subtitle alert-text" style="margin-bottom: 20px;">Track something new</p>
+        
+        <input 
+          type="text" 
+          v-model="customExerciseName" 
+          placeholder="Exercise Name (e.g. Rowing)"
+          class="weight-input modal-input"
+        >
+        <input 
+          type="text" 
+          v-model="customExerciseUnit" 
+          placeholder="Units (e.g. km, mins, reps)"
+          class="weight-input modal-input"
+        >
+        
+        <div class="modal-actions">
+          <button @click="closeCustomModal" class="btn-back">Cancel</button>
+          <button @click="addCustomExercise" class="btn-primary">Add to Grid</button>
+        </div>
+      </div>
+    </div>
+
+    <div v-if="showValidationErrorModal" class="modal-overlay" @click.self="closeValidationErrorModal">
+      <div class="modal-content">
+        <h2>Error!</h2>
+        <p class="modal-subtitle alert-text" style="margin-bottom: 20px;">{{ validationErrorMessage }}</p>
+        
+        <div class="modal-actions center-actions">
+          <button @click="closeValidationErrorModal" class="btn-primary">Okay</button>
+        </div>
+      </div>
     </div>
 
     <div v-if="showPopup" class="modal-overlay" @click.self="closePopup">
@@ -147,6 +186,13 @@ export default {
       newAttempts: {},
       recentlyBroken: null,
       
+      showCustomModal: false,
+      customExerciseName: "",
+      customExerciseUnit: "",
+
+      showValidationErrorModal: false,
+      validationErrorMessage: "",
+
       showPopup: false,
       currentPopupExercise: null,
       popupInput: null,
@@ -165,7 +211,6 @@ export default {
         "You're a beast!",
         "Incredible progress!",
         "Way to push your limits!",
-        "10/10, Looking Good",
         "Absolutely crushing it!",
         "Keep it up!",
         "Phenomenal effort!",
@@ -182,6 +227,45 @@ export default {
     }
   },
   methods: {
+    openCustomModal() {
+      this.customExerciseName = "";
+      this.customExerciseUnit = "";
+      this.showCustomModal = true;
+    },
+    closeCustomModal() {
+      this.showCustomModal = false;
+    },
+    addCustomExercise() {
+      const name = this.customExerciseName.trim();
+      const unit = this.customExerciseUnit.trim();
+      
+      if (!name || !unit) {
+        this.openValidationErrorModal("Please provide both a name and a unit.");
+        return;
+      }
+      
+      if (this.exercises.includes(name)) {
+        this.openValidationErrorModal("This exercise already exists!");
+        return;
+      }
+
+      this.exercises.push(name);
+      this.exerciseUnits[name] = unit;
+      this.personalBests[name] = null;
+      this.newAttempts[name] = null;
+
+      this.closeCustomModal();
+    },
+
+    openValidationErrorModal(message) {
+        this.validationErrorMessage = message;
+        this.showValidationErrorModal = true;
+    },
+    closeValidationErrorModal() {
+        this.validationErrorMessage = "";
+        this.showValidationErrorModal = false;
+    },
+
     openPopup(exercise) {
       this.currentPopupExercise = exercise;
       this.popupInput = null;
@@ -287,6 +371,12 @@ export default {
   padding-bottom: 20px;
 }
 
+.header-actions {
+  display: flex;
+  gap: 15px;
+  align-items: center;
+}
+
 .page-header h1 {
   color: var(--text-h);
   font-size: 2.5rem;
@@ -332,6 +422,11 @@ export default {
     flex-direction: column;
     align-items: flex-start;
     gap: 15px;
+  }
+  .header-actions {
+    width: 100%;
+    flex-direction: column-reverse;
+    align-items: stretch;
   }
 }
 
@@ -383,6 +478,11 @@ export default {
 
 .btn-primary:hover {
   opacity: 0.9;
+}
+
+.btn-sm {
+  width: auto;
+  padding: 10px 20px;
 }
 
 .btn-danger {
