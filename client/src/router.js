@@ -3,6 +3,7 @@ import VueRouter from 'vue-router'
 import Calendar from './components/Calendar.vue'
 import DayView from './components/DayView.vue'
 import ExerciseInstructions from './components/ExerciseInstructions.vue'
+import PersonalBests from './components/PersonalBests.vue'
 
 Vue.use(VueRouter)
 
@@ -22,7 +23,12 @@ const routes = [
     path: '/instructions',
     name: 'Instructions',
     component: ExerciseInstructions
-  }
+  },
+  {
+  path: '/records',
+  name: 'PersonalBests',
+  component: PersonalBests
+}
 ]
 
 const router = new VueRouter({
