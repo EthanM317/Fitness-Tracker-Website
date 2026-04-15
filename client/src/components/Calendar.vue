@@ -61,8 +61,12 @@ export default {
         date.setDate(startDate.getDate() + i)
         const isCurrentMonth = date.getMonth() === month
         const isToday = date.toDateString() === today.toDateString()
+        const localYear = date.getFullYear();
+        const localMonth = String(date.getMonth() + 1).padStart(2, '0');
+        const localDay = String(date.getDate()).padStart(2, '0');
+
         days.push({
-          date: date.toISOString().split('T')[0],
+          date: `${localYear}-${localMonth}-${localDay}`,
           day: date.getDate(),
           isCurrentMonth,
           isToday

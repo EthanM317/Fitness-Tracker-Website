@@ -28,14 +28,15 @@ export default {
       exercises: []
     }
   },
-  computed: {
+computed: {
     formattedDate() {
-      return new Date(this.date).toLocaleDateString('en-US', {
+      const [year, month, day] = this.date.split('-');
+      return new Date(year, month - 1, day).toLocaleDateString('en-US', {
         weekday: 'long',
         year: 'numeric',
         month: 'long',
         day: 'numeric'
-      })
+      });
     }
   },
   mounted() {
