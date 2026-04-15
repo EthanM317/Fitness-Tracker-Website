@@ -1,14 +1,5 @@
 <template>
   <div class="calendar">
-    <h1>
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <rect x="3" y="4" width="18" height="18" rx="2" ry="2" stroke="currentColor" stroke-width="2" fill="none"/>
-        <line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2"/>
-        <line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2"/>
-        <line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/>
-      </svg>
-      Exercise Tracker
-    </h1>
     <div class="calendar-header">
       <button @click="prevMonth">&lt;</button>
       <h2>{{ currentMonthName }} {{ currentYear }}</h2>
@@ -90,6 +81,15 @@ export default {
 </script>
 
 <style scoped>
+button {
+  background-color: var(--social-bg);
+  padding: 1px 10px;
+}
+
+.calendar-header * {
+  font-size: 36px;
+}
+
 .calendar {
   max-width: 800px;
   margin: 0 auto;
@@ -108,6 +108,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
+  margin-top: 2px;
 }
 
 .calendar-grid {
@@ -127,7 +128,8 @@ export default {
   padding: 10px;
   border: 1px solid var(--text);
   cursor: pointer;
-  min-height: 60px;
+  min-height: 90px;
+  font-size: 24px;
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
