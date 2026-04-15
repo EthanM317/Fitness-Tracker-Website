@@ -1,10 +1,22 @@
 <script>
+    export default {
+        props: {
+            metricName: {
+                type: String,
+                default: 'New Metric'
+            },
+            count: {
+                type: [Number, String],
+                default: 0
+            }
+        }
+    }
 </script>
 
 <template>
     <div class="container">
-        <p>MetricName</p>
-        <h5>Count</h5>
+        <p>{{ metricName }}</p>
+        <h5>{{ count }}</h5>
     </div>
 </template>
 
