@@ -27,7 +27,6 @@
     }
     .calendar { 
         flex: 1 1 0;
-        margin: 10px;
     }
 
     .dashboard { flex: 1 1 0; }

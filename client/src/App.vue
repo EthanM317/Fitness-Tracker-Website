@@ -13,9 +13,10 @@ export default {
 <template>
   <div id="app">
     <nav>
-      <AppLogo />
+      <AppLogo class="logo" />
       <RouterLink to="/">Calendar</RouterLink>
       <RouterLink to="/instructions">Instructions</RouterLink>
+      <RouterLink to="/records">Personal Bests</RouterLink>
     </nav>
     <router-view />
   </div>
@@ -47,6 +48,10 @@ nav a {
 
 nav a:hover {
   color: var(--accent);
+}
+
+.logo {
+  margin-right: 10px;
 }
 
 #app {

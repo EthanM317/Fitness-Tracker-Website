@@ -31,9 +31,15 @@ export default {
 
 <style scoped>
 .exercise-list {
-  margin: 20px auto;
-  max-width: 800px;
+  margin: 15px;
+  max-width: 600px;
   color: var(--text);
+}
+
+.exercise-list h2 {
+  font-size: 1.5em;
+  font-weight: bold;
+  margin-bottom: 15px;
 }
 
 .exercise-item {
@@ -43,7 +49,7 @@ export default {
   padding: 10px;
   border: 1px solid var(--border);
   margin-bottom: 10px;
-  background-color: var(--code-bg);
+  background-color: var(--bg);
 }
 
 .exercise-info {
@@ -60,5 +66,9 @@ export default {
 
 .delete-btn:hover {
   background-color: var(--red-2);
+}
+
+ul {
+  padding: 0px;
 }
 </style>

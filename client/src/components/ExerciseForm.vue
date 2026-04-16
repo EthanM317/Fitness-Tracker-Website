@@ -221,7 +221,7 @@ export default {
 
 <style scoped>
 .exercise-form {
-  margin: 20px auto;
+  margin: 15px;
   max-width: 400px;
 }
 
@@ -251,7 +251,7 @@ input, select {
   padding: 8px;
   box-sizing: border-box;
   border: 1px solid var(--border);
-  background-color: var(--code-bg);
+  background-color: var(--bg);
   color: var(--text);
   font-family: inherit;
   font-size: inherit;

@@ -4,7 +4,6 @@
       <h1>Personal Bests</h1>
       <div class="header-actions">
         <button @click="openCustomModal" class="btn-primary btn-sm">+ Add Custom</button>
-        <router-link to="/" class="btn-back">Back to Calendar</router-link>
       </div>
     </header>
 
@@ -539,10 +538,9 @@ export default {
 .btn-primary {
   padding: 10px 15px;
   background-color: var(--green-1);
-  color: #000;
+  color: #FFF;
   border: none;
   border-radius: 4px;
-  font-weight: bold;
   cursor: pointer;
   width: 100%;
 }

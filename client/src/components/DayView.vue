@@ -2,8 +2,14 @@
   <div class="day-view">
     <h1>{{ formattedDate }}</h1>
     <button @click="$router.push('/')">Back to Calendar</button>
-    <ExerciseForm :date="date" @add-exercise="addExercise" />
-    <ExerciseList :exercises="exercises" @delete-exercise="deleteExercise" />
+    <div class="flex-container">
+      <div class="element-container">
+        <ExerciseForm class="exerciseForm" :date="date" @add-exercise="addExercise" />
+      </div>
+      <div class="element-container">
+        <ExerciseList class="exerciseList" :exercises="exercises" @delete-exercise="deleteExercise" />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -87,8 +93,7 @@ computed: {
 
 <style scoped>
 .day-view {
-  max-width: 800px;
-  margin: 0 auto;
+  margin: 0 5%;
 }
 
 .day-view h1 {
@@ -96,6 +101,23 @@ computed: {
   font-size: 2em;
   font-weight: bold;
   margin-bottom: 20px;
+}
+
+.flex-container {
+  display: flex;
+  gap: 5%;
+  padding-top: 15px;
+}
+
+.element-container {
+  flex: 1 1 0;
+  background-color: var(--code-bg);
+  border-radius: 24px;
+}
+
+.exercise-form {
+  margin-left: auto;
+  margin-right: auto;
 }
 
 button {

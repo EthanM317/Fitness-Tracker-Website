@@ -124,17 +124,11 @@
         gap: 10px;
     }
 
-    .chart-placeholder {
-        background-color: var(--code-bg);
-        border-radius: 12px;
-        padding: 280px 0px;
-    }
-
     #title {
         font-size: 36px;
         background-color: var(--code-bg);
         border-radius: 12px;
-        padding: 8px 16px;
+        padding: 9px 16px;
         margin: 0px;
     }
 </style>

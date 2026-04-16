@@ -2,7 +2,6 @@
   <div class="instructions-page main-container">
     <header class="page-header">
       <h1>Exercise Library</h1>
-      <router-link to="/" class="btn-back">Back to Calendar</router-link>
     </header>
 
     <div class="exercise-list" v-if="Object.keys(exercises).length > 0">
@@ -102,19 +101,17 @@ exercises: {
 .instructions-page {
   max-width: 800px;
   margin: 0 auto;
-  padding-bottom: 50px;
+  padding: 15px 0px 50px 0px;
 }
 
 .page-header {
-  display: flex;
-  justify-content: space-between;
   align-items: center;
   margin-bottom: 30px;
 }
 
 .page-header h1 {
   color: var(--text-h);
-  font-size: 2em;
+  font-size: 2.5em;
   font-weight: bold;
   margin: 0;
 }

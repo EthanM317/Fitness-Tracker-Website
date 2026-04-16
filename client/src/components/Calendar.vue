@@ -108,7 +108,6 @@ button {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
-  margin-top: 2px;
 }
 
 .calendar-grid {
@@ -128,7 +127,7 @@ button {
   padding: 10px;
   border: 1px solid var(--text);
   cursor: pointer;
-  min-height: 90px;
+  min-height: 92px;
   font-size: 24px;
   display: flex;
   align-items: flex-start;
