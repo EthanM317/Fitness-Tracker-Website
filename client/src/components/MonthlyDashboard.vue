@@ -1,17 +1,27 @@
 <script>
     import DashboardCounter from './DashboardCounter.vue';
+    import AreaChart from './AreaChart.vue';
     import { ref, onMounted, computed } from 'vue';
 
     export default {
         components: {
-            DashboardCounter
+            DashboardCounter,
+            AreaChart
         },
         setup() {
             const exercises = ref([]);
             const loading = ref(false);
 
+            const currentYear = new Date().getFullYear();
             const currentMonth = new Date().getMonth();
             const currentDate = new Date().getDate();
+
+            const monthsExercises = computed(() => {
+                return exercises.value.filter(e => {
+                    const exerciseDate = new Date(e.date); 
+                    return exerciseDate.getMonth() === currentMonth;
+                });
+            });
 
             async function fetchExercises() {
                 loading.value = true;
@@ -45,24 +55,46 @@
 
             const averageWeight = computed(() => {
                 let totalWeight = 0
+                let average = "--";
 
-                let monthly = exercises.value.filter(e => {
-                    const exerciseDate = new Date(e.date); 
-                    return exerciseDate.getMonth() === currentMonth;
-                });
-
-                monthly.forEach(e => {
+                monthsExercises.value.forEach(e => {
                     totalWeight += e.weight;
                 });
 
-                return (totalWeight / totalExercises.value).toFixed(3);
+                if(totalExercises.value > 0) {
+                    average = (totalWeight / totalExercises.value).toFixed(3);
+                }
+
+                return average;
+            });
+
+            const dailyExerciseCount = computed(() => {
+                const totalDays = new Date(currentYear, currentMonth + 1, 0).getDate();
+
+                let daysArray = Array.from({ length: totalDays }, (_, i) => {
+                    const dayDate = new Date(currentYear, currentMonth, i + 1);
+                    return {
+                        date: dayDate.toISOString().split('T')[0],
+                        exercises: 0
+                    };
+                });
+
+                monthsExercises.value.forEach(e => {
+                    const d = new Date(e.date);
+                    const dayOfMonth = d.getDate();
+                    if (daysArray[dayOfMonth - 1]) {
+                        daysArray[dayOfMonth - 1].exercises += 1;
+                    }
+                });
+
+                return daysArray
             });
 
             onMounted(() => {
                 fetchExercises();
             });
 
-            return { totalExercises, averageDailyExercises, averageWeight };
+            return { totalExercises, averageDailyExercises, averageWeight, dailyExerciseCount };
         }
     }
 </script>
@@ -70,7 +102,7 @@
 <template>
     <div class="component-container">
         <h2 id="title">Monthly Overview</h2>
-        <div class="chart-placeholder"></div>
+        <AreaChart :exercises="dailyExerciseCount" />
         <div class="counter-bar">
             <DashboardCounter metricName="Total Exercises" :count="totalExercises" />
             <DashboardCounter metricName="Average Daily Exercises" :count="averageDailyExercises"/>
