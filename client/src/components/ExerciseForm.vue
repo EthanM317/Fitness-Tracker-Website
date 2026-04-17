@@ -58,7 +58,7 @@
         <input type="number" id="sets" v-model.number="form.sets" min="0" required>
       </div>
       <div class="form-group">
-        <label for="reps">Reps:</label>
+        <label for="reps">Reps or Duration (mins):</label>
         <input type="number" id="reps" v-model.number="form.reps" min="0" required>
       </div>
       <div class="form-group">

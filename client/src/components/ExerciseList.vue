@@ -4,7 +4,7 @@
     <ul>
       <li v-for="exercise in exercises" :key="exercise.id" class="exercise-item">
         <div class="exercise-info">
-          <strong>{{ exercise.name }}</strong> - {{ exercise.sets }} sets x {{ exercise.reps }} reps @ {{ exercise.weight }}lbs on {{ exercise.date }}
+          <strong>{{ exercise.name }}</strong> - {{ exercise.sets }} sets x {{ exercise.reps }} reps or duration (mins) @ {{ exercise.weight }}lbs on {{ exercise.date }}
         </div>
         <button @click="deleteExercise(exercise.id)" class="delete-btn">Delete</button>
       </li>
