@@ -303,7 +303,7 @@ export default {
 
     async checkAndUpdatePb(exerciseName, weight) {
       try {
-        const response = await fetch(`/api/pb?name=${encodeURIComponent(exerciseName)}`);
+        const response = await fetch(`/api/pb/${encodeURIComponent(exerciseName)}`);
 
         let pbData = null;
 
