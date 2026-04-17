@@ -4,7 +4,7 @@ const fs = require('fs').promises;
 const app = express();
 const port = 3000;
 
-const DATABASE_PATH = "./database/db.json";
+const DATABASE_PATH = "./db.json";
 
 // Middleware
 app.use(cors());
