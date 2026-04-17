@@ -44,7 +44,15 @@
             id="customName" 
             ref="customNameInput" 
             v-model="newExerciseName" 
-            placeholder="Custom Exercise Name Here!"
+            placeholder="e.g., Rowing"
+            @input="clearError"
+          >
+          <input 
+            type="text" 
+            id="customUnits" 
+            ref="customUnitsInput" 
+            v-model="newExerciseUnits" 
+            placeholder="Units (km, lbs, reps...)"
             @input="clearError"
             @keyup.enter="saveCustomExercise"
           >
@@ -111,6 +119,7 @@ export default {
       customExercises: [],
       isAddingCustom: false,
       newExerciseName: '',
+      newExerciseUnits: '',
       form: {
         name: '',
         sets: 0,
@@ -150,9 +159,19 @@ export default {
 
   mounted() {
     this.fetchCustomExerciseTypes();
+    // Listen for changes from PersonalBests component
+    window.addEventListener('exercise-list-changed', this.refreshData);
+  },
+
+  beforeDestroy() {
+    window.removeEventListener('exercise-list-changed', this.refreshData);
   },
 
   methods: {
+    refreshData() {
+      this.fetchCustomExerciseTypes();
+    },
+
     handleSelectChange() {
       if (this.form.name === 'ADD_NEW') {
         this.isAddingCustom = true;
@@ -170,9 +189,14 @@ export default {
 
     async saveCustomExercise() {
       const name = this.newExerciseName.trim();
-      const inputEl = this.$refs.customNameInput;
+      const units = this.newExerciseUnits.trim();
+      const nameInput = this.$refs.customNameInput;
 
-      if (!name) return;
+      if (!name || !units) {
+        nameInput.setCustomValidity('Please provide both a name and units.');
+        nameInput.reportValidity();
+        return;
+      }
 
       const searchName = name.toLowerCase();
       const isDuplicate =
@@ -180,13 +204,13 @@ export default {
         this.customExercises.some(ex => ex.toLowerCase() === searchName);
 
       if (isDuplicate) {
-        inputEl.setCustomValidity(`An exercise named "${name}" already exists.`);
-        inputEl.reportValidity();
+        nameInput.setCustomValidity(`An exercise named "${name}" already exists.`);
+        nameInput.reportValidity();
         return;
       }
 
+      // 1. Save to custom exercise types list
       this.customExercises.push(name);
-
       try {
         await fetch('/api/custom-exercise-types', {
           method: 'POST',
@@ -197,12 +221,32 @@ export default {
         console.error('Error: Could not add custom exercise type.', error);
       }
 
+      // 2. Create a PB entry with null value (so it shows "No record set yet")
+      try {
+        await fetch('/api/pb', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: name,
+            units: units,
+            value: null,
+            isCustom: true
+          })
+        });
+      } catch (error) {
+        console.error('Error creating initial PB entry:', error);
+      }
+
       this.form.name = name;
       this.isAddingCustom = false;
       this.newExerciseName = '';
+      this.newExerciseUnits = '';
       this.form.sets = 0;
       this.form.reps = 0;
       this.form.weight = 0;
+
+      // 3. Notify PersonalBests component to refresh
+      window.dispatchEvent(new CustomEvent('exercise-list-changed'));
     },
 
     clearError() {
@@ -214,12 +258,14 @@ export default {
     cancelCustomExercise() {
       this.isAddingCustom = false;
       this.newExerciseName = '';
+      this.newExerciseUnits = '';
       this.form.name = '';
     },
 
     async deleteCustomExercise() {
       let deleteName = this.form.name;
 
+      // 1. Delete from custom exercise types list
       try {
         await fetch(`/api/custom-exercise-types/${deleteName}`, {
           method: 'DELETE'
@@ -228,8 +274,20 @@ export default {
         console.error('Error: Failed to delete custom exercise type.', error);
       }
 
+      // 2. Delete the PB entry for this exercise
+      try {
+        await fetch(`/api/pb/${deleteName}`, {
+          method: 'DELETE'
+        });
+      } catch (error) {
+        console.error('Error deleting PB entry:', error);
+      }
+
       this.customExercises = this.customExercises.filter(ex => ex !== deleteName);
       this.form.name = '';
+
+      // 3. Notify PersonalBests component to refresh
+      window.dispatchEvent(new CustomEvent('exercise-list-changed'));
     },
 
     async submitForm() {
@@ -253,19 +311,26 @@ export default {
           pbData = await response.json();
         }
 
+        // Determine the correct units: use whatever is stored, or fall back to 'lbs'
+        const units = (pbData && pbData.units) ? pbData.units : 'lbs';
+        const isCustom = (pbData && pbData.isCustom) ? pbData.isCustom : this.customExercises.includes(exerciseName);
+
         if (!pbData || pbData.value === undefined || pbData.value === null) {
+          // No PB set yet — use the logged weight as the first PB
           await fetch('/api/pb', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               name: exerciseName,
-              units: 'lbs',
+              units: units,
               value: weight,
-              isCustom: false
+              isCustom: isCustom
             })
           });
 
           this.showPbToast(exerciseName, weight);
+          // Notify PersonalBests that PB changed
+          window.dispatchEvent(new CustomEvent('exercise-list-changed'));
           return;
         }
 
@@ -276,13 +341,14 @@ export default {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               name: exerciseName,
-              units: pbData.units || 'lbs',
+              units: units,
               value: weight,
-              isCustom: pbData.isCustom || false
+              isCustom: isCustom
             })
           });
 
           this.showPbToast(exerciseName, weight);
+          window.dispatchEvent(new CustomEvent('exercise-list-changed'));
         }
 
       } catch (error) {
@@ -291,7 +357,7 @@ export default {
     },
 
     showPbToast(name, weight) {
-      if (this  .pbToastTimer) clearTimeout(this.pbToastTimer);
+      if (this.pbToastTimer) clearTimeout(this.pbToastTimer);
       this.pbToast = { name, weight };
       this.pbToastTimer = setTimeout(() => {
         this.pbToast = null;
@@ -320,33 +386,30 @@ export default {
   }
 }
 </script>
+
 <style scoped>
+/* (original styles unchanged – keep as in the original) */
 .exercise-form {
   margin: 15px;
   max-width: 400px;
 }
-
 .exercise-form h2 {
   font-size: 1.5em;
   font-weight: bold;
   margin-bottom: 15px;
 }
-
 .form-group {
   margin-bottom: 15px;
 }
-
 .input-group {
   display: flex;
   gap: 10px;
 }
-
 label {
   display: block;
   margin-bottom: 5px;
   font-weight: 500;
 }
-
 input, select {
   width: 100%;
   padding: 8px;
@@ -357,7 +420,6 @@ input, select {
   font-family: inherit;
   font-size: inherit;
 }
-
 button {
   background-color: var(--green-1);
   color: white;
@@ -366,29 +428,23 @@ button {
   cursor: pointer;
   white-space: nowrap;
 }
-
 button:hover {
   background-color: var(--green-2);
 }
-
 .btn-danger {
   background-color: var(--red-1);
 }
-
 .btn-danger:hover {
   background-color: var(--red-2);
 }
-
 .btn-cancel {
   background-color: transparent;
   border: 1px solid var(--border);
   color: var(--text);
 }
-
 .btn-cancel:hover {
   background-color: var(--border);
 }
-
 .exercise-link-box {
   background-color: rgba(255, 255, 255, 0.03);
   border-left: 3px solid var(--green-1);
@@ -399,14 +455,12 @@ button:hover {
   justify-content: center;
   align-items: center;
 }
-
 .info-link {
   color: var(--green-1);
   text-decoration: none;
   font-weight: bold;
   font-size: 0.95em;
 }
-
 .pb-toast {
   position: fixed;
   bottom: 30px;
