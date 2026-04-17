@@ -46,6 +46,7 @@
               v-model.number="newAttempts[exercise]" 
               :placeholder="'Enter ' + exerciseUnits[exercise] + '...'"
               class="weight-input"
+              @keyup.enter="checkRecord(exercise)"
             >
             <button @click="checkRecord(exercise)" class="btn-log">Log</button>
           </div>
@@ -63,12 +64,14 @@
           v-model="customExerciseName" 
           placeholder="Exercise Name (e.g. Rowing)"
           class="weight-input modal-input"
-        >
-        <input 
+          @keyup.enter="addCustomExercise"
+          >
+          <input 
           type="text" 
           v-model="customExerciseUnit" 
           placeholder="Units (e.g. km, mins, reps)"
           class="weight-input modal-input"
+          @keyup.enter="addCustomExercise"
         >
         
         <div class="modal-actions">
@@ -99,6 +102,7 @@
           v-model.number="popupInput" 
           :placeholder="'Record (' + exerciseUnits[currentPopupExercise] + ')'"
           class="weight-input modal-input"
+          @keyup.enter="saveInitialPb"
         >
         
         <div class="modal-actions">
