@@ -310,7 +310,7 @@ export default {
       }
     },
 
-    checkRecord(exercise)
+    async checkRecord(exercise)
     {
       const attempt = this.newAttempts[exercise];
       const currentPb = this.personalBests[exercise];
@@ -320,6 +320,9 @@ export default {
       if (attempt > currentPb) {
         this.personalBests[exercise] = attempt;
         this.triggerCelebration(exercise, attempt);
+
+        await this.savePersonalBest(exercise);
+
       } else {
         this.triggerAlert(currentPb, exercise);
       }
@@ -337,11 +340,14 @@ export default {
       this.showResetModal = false;
       this.exerciseToReset = null;
     },
-    confirmReset()
+    async confirmReset()
     {
       if (this.exerciseToReset) {
         this.personalBests[this.exerciseToReset] = null;
         this.newAttempts[this.exerciseToReset] = null;
+
+        await this.savePersonalBest(this.exerciseToReset);
+
         this.closeResetModal();
       }
     },
