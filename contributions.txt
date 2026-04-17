@@ -13,3 +13,12 @@ Ellie Cunningham
     - Redesigned/reorganized calender view and day view to reduce empty space and make room for dashboard. 
     - Added Navbar.
     - CSS cleanup throughout all pages to fix inconsistencies and add light mode support.
+
+Parish Schitka
+    - Set the default exercises and their default data.
+    - Added the ability to create and delete custom exercises.
+    - Built the entire Exercise Instructions page, adding custom images and detailed exercise instructions.
+    - Created the Personal Bests page and ability to record the users stats.
+    - Added the record entry system's randomized celebration alerts and feedback messages depending on the results entered.
+    - Added dynamic links so the form can jump to a specific exercise guide on a separate page.
+    - Improved form validation for user imputs, regarding duplicate names and decimal values.
