@@ -22,3 +22,10 @@ Parish Schitka
     - Added the record entry system's randomized celebration alerts and feedback messages depending on the results entered.
     - Added dynamic links so the form can jump to a specific exercise guide on a separate page.
     - Improved form validation for user imputs, regarding duplicate names and decimal values.
+
+
+Connor Madden 
+    - Error checking and debugging of exercise form and pb views
+    - Added ability to track and update personal bests from exercise form
+    - Added ability to track personal bests for custom exercises
+    - Added cross functionality between adding exercises in the personal bests view and the exercise form view
