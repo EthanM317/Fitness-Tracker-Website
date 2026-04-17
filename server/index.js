@@ -13,9 +13,10 @@ app.use(express.static('public'));
 
 // In-memory storage for exercises
 let exercises = [];
+let customExerciseTypes = [];
 
 // -- Routes --
-// Get all exercises
+// Get exercise on date
 app.get('/api/exercises', (req, res) => {
   const { date } = req.query
   if (date) {
@@ -53,6 +54,7 @@ app.put('/api/exercises/:id', async (req, res) => {
   }
 });
 
+// Delete an exercise by ID
 app.delete('/api/exercises/:id', async (req, res) => {
   const id = parseInt(req.params.id);
   exercises = exercises.filter(e => e.id !== id);
@@ -63,13 +65,39 @@ app.delete('/api/exercises/:id', async (req, res) => {
   console.log("Deleted exercise ", id)
 });
 
+// Get all custom exercise types
+app.get('/api/custom-exercise-types', (req, res) => {
+  res.json(customExerciseTypes);
+
+  console.log("Fetched all custom event types ", customExerciseTypes);
+});
+
+// Create a new custom exercise type
+app.post('/api/custom-exercise-types', async (req, res) => {
+  customExerciseTypes = req.body;
+  res.json({ success: true });
+  await writeDatabase();
+});
+
+// Delete a custom exercise type
+app.delete('/api/custom-exercise-types/:id', async (req, res) => {
+  const id = req.params.id;
+  customExerciseTypes = customExerciseTypes.filter(e => e !== id);
+  res.json({ success: true });
+
+  await writeDatabase();
+
+  console.log("Deleted custom exercise type ", id)
+});
+
 
 // -- "Database" functions --
 async function writeDatabase() {
   // The whole database is just stored as a single JSON.
   // This wouldn't scale very well, but it works for our simple app.
   let data = {
-    exercises: exercises
+    exercises: exercises,
+    customExerciseTypes: customExerciseTypes
   };
 
   await fs.writeFile(DATABASE_PATH, JSON.stringify(data));
@@ -85,6 +113,10 @@ async function readDatabase() {
   let data = JSON.parse(await fs.readFile(DATABASE_PATH));
   if (data.exercises) {
     exercises = data.exercises;
+  }
+
+  if (data.customExerciseTypes) {
+    customExerciseTypes = data.customExerciseTypes;
   }
 }
 

@@ -138,10 +138,7 @@ export default {
     }
   },
   mounted() {
-    const saved = localStorage.getItem('customExercises');
-    if (saved) {
-      this.customExercises = JSON.parse(saved);
-    }
+    this.fetchCustomExerciseTypes();
   },
   methods: {
     handleSelectChange() {
@@ -160,7 +157,7 @@ export default {
       }
     },
 
-    saveCustomExercise() {
+    async saveCustomExercise() {
       const name = this.newExerciseName.trim();
       const inputEl = this.$refs.customNameInput;
 
@@ -175,8 +172,19 @@ export default {
         inputEl.reportValidity();
         return; 
       }
+      
       this.customExercises.push(name);
-      localStorage.setItem('customExercises', JSON.stringify(this.customExercises));
+      try {
+        const response = await fetch('/api/custom-exercise-types', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(this.customExercises)
+        });
+      } catch (error) {
+        console.error('Error: Could not add custom exercise type. ', error);
+      }
       
       this.form.name = name;
       this.isAddingCustom = false;
@@ -197,15 +205,27 @@ export default {
       this.newExerciseName = '';
       this.form.name = '';
     },
-    deleteCustomExercise() {
-      this.customExercises = this.customExercises.filter(ex => ex !== this.form.name);
-      localStorage.setItem('customExercises', JSON.stringify(this.customExercises));
+    
+    async deleteCustomExercise() {
+      let deleteName = this.form.name;
+
+      try {
+        const response = await fetch(`/api/custom-exercise-types/${deleteName}`, {
+          method: 'DELETE'
+        });
+      } catch (error) {
+        console.error('Error: Failed to delete custom exercise type. ', error);
+      }
+      
+      this.customExercises = this.customExercises.filter(ex => ex !== deleteName);
       this.form.name = ''; 
     },
+    
     submitForm() {
       this.$emit('add-exercise', { ...this.form })
       this.resetForm()
     },
+
     resetForm() {
       this.form = {
         name: '',
@@ -213,6 +233,15 @@ export default {
         reps: 0,
         weight: 0,
         date: this.date || new Date().toLocaleDateString('en-CA')
+      }
+    },
+
+    async fetchCustomExerciseTypes() {
+      try {
+        const response = await fetch('/api/custom-exercise-types');
+        this.customExercises = await response.json();
+      } catch (error) {
+        console.error('Error: Failed to fetch custom exercise types.');
       }
     }
   }
