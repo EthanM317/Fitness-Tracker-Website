@@ -139,6 +139,8 @@ export default {
     }
   },
   mounted() {
+    // TODO: The page displays before the values come in from the server.
+    // Maybe consider having a loading icon?
     this.fetchCustomExerciseTypes();
   },
   methods: {
@@ -242,7 +244,7 @@ export default {
         const response = await fetch('/api/custom-exercise-types');
         this.customExercises = await response.json();
       } catch (error) {
-        console.error('Error: Failed to fetch custom exercise types.');
+        console.error('Error: Failed to fetch custom exercise types. ', error);
       }
     }
   }

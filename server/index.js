@@ -15,8 +15,11 @@ app.use(express.static('public'));
 let exercises = [];
 let customExerciseTypes = [];
 
+let personalBests = {};
+let customPersonalBests = {};
+
 // -- Routes --
-// Get exercise on date
+// Get exercise on date, or all exercises
 app.get('/api/exercises', (req, res) => {
   const { date } = req.query
   if (date) {
@@ -68,7 +71,6 @@ app.delete('/api/exercises/:id', async (req, res) => {
 // Get all custom exercise types
 app.get('/api/custom-exercise-types', (req, res) => {
   res.json(customExerciseTypes);
-
   console.log("Fetched all custom event types ", customExerciseTypes);
 });
 
@@ -91,13 +93,61 @@ app.delete('/api/custom-exercise-types/:id', async (req, res) => {
 });
 
 
+// Fetch all personal bests
+app.get('/api/pb', async (req, res) => {
+  const { name } = req.query
+  if (name) {
+    // Return just the thing we're looking for
+    const pb = personalBests[name];
+    res.json(pb);
+  } else {
+    // Return everything
+    res.json(personalBests);
+    console.log("Fetching personalBests: ", personalBests);
+  }
+});
+
+// Create a new personal best
+app.post('/api/pb', async (req, res) => {
+  const pb = req.body;
+
+  personalBests[pb.name] = {
+    units: pb.units,
+    value: pb.value,
+    isCustom: pb.isCustom
+  };
+  res.json({ success: true });
+
+  await writeDatabase();
+  // console.log("Created new pb: ", personalBests[pb.name]);
+});
+
+// Delete a personal best type
+app.delete('/api/pb/:id', async (req, res) => {
+  const id = req.params.id;
+
+  console.log(id);
+
+  if (id in personalBests) {
+    delete personalBests[id];
+  }
+
+  res.json({ success: true });
+
+  await writeDatabase();
+
+  console.log("Deleted custom pb type ", id)
+});
+
+
 // -- "Database" functions --
 async function writeDatabase() {
   // The whole database is just stored as a single JSON.
   // This wouldn't scale very well, but it works for our simple app.
   let data = {
     exercises: exercises,
-    customExerciseTypes: customExerciseTypes
+    customExerciseTypes: customExerciseTypes,
+    personalBests: personalBests
   };
 
   await fs.writeFile(DATABASE_PATH, JSON.stringify(data));
@@ -111,12 +161,17 @@ async function readDatabase() {
   }
   
   let data = JSON.parse(await fs.readFile(DATABASE_PATH));
+
   if (data.exercises) {
     exercises = data.exercises;
   }
 
   if (data.customExerciseTypes) {
     customExerciseTypes = data.customExerciseTypes;
+  }
+
+  if (data.personalBests) {
+    personalBests = data.personalBests;
   }
 }
 

@@ -8,24 +8,16 @@
     </header>
 
     <div class="pb-grid">
-      <section 
-        v-for="exercise in exercises" 
-        :key="exercise" 
-        class="pb-card"
-        :class="{ 'glowing': recentlyBroken === exercise }"
-      >
+      <section v-for="exercise in exercises" :key="exercise" class="pb-card"
+        :class="{ 'glowing': recentlyBroken === exercise }">
         <div class="card-header">
           <h2>{{ exercise }}</h2>
-          <button 
-            v-if="customExercises.includes(exercise)" 
-            @click="openDeleteModal(exercise)" 
-            class="btn-delete-custom"
-            title="Remove Custom Exercise"
-          >
+          <button v-if="customExercises.includes(exercise)" @click="openDeleteModal(exercise)" class="btn-delete-custom"
+            title="Remove Custom Exercise">
             ✕
           </button>
         </div>
-        
+
         <div v-if="personalBests[exercise] === null" class="unset-state">
           <p>No record set yet.</p>
           <button @click="openPopup(exercise)" class="btn-primary">Set Initial PB</button>
@@ -41,13 +33,9 @@
           </div>
 
           <div class="log-section">
-            <input 
-              type="number" 
-              v-model.number="newAttempts[exercise]" 
-              :placeholder="'Enter ' + exerciseUnits[exercise] + '...'"
-              class="weight-input"
-              @keyup.enter="checkRecord(exercise)"
-            >
+            <input type="number" v-model.number="newAttempts[exercise]"
+              :placeholder="'Enter ' + exerciseUnits[exercise] + '...'" class="weight-input"
+              @keyup.enter="checkRecord(exercise)">
             <button @click="checkRecord(exercise)" class="btn-log">Log</button>
           </div>
         </div>
@@ -58,22 +46,12 @@
       <div class="modal-content">
         <h2>Add Custom Exercise</h2>
         <p class="modal-subtitle alert-text" style="margin-bottom: 20px;">Track something new</p>
-        
-        <input 
-          type="text" 
-          v-model="customExerciseName" 
-          placeholder="Exercise Name (e.g. Rowing)"
-          class="weight-input modal-input"
-          @keyup.enter="addCustomExercise"
-          >
-          <input 
-          type="text" 
-          v-model="customExerciseUnit" 
-          placeholder="Units (e.g. km, mins, reps)"
-          class="weight-input modal-input"
-          @keyup.enter="addCustomExercise"
-        >
-        
+
+        <input type="text" v-model="customExerciseName" placeholder="Exercise Name (e.g. Rowing)"
+          class="weight-input modal-input" @keyup.enter="addCustomExercise">
+        <input type="text" v-model="customExerciseUnit" placeholder="Units (e.g. km, mins, reps)"
+          class="weight-input modal-input" @keyup.enter="addCustomExercise">
+
         <div class="modal-actions">
           <button @click="closeCustomModal" class="btn-back">Cancel</button>
           <button @click="addCustomExercise" class="btn-primary">Add to Grid</button>
@@ -85,7 +63,7 @@
       <div class="modal-content">
         <h2>Error!</h2>
         <p class="modal-subtitle alert-text" style="margin-bottom: 20px;">{{ validationErrorMessage }}</p>
-        
+
         <div class="modal-actions center-actions">
           <button @click="closeValidationErrorModal" class="btn-primary">Okay</button>
         </div>
@@ -96,15 +74,11 @@
       <div class="modal-content">
         <h2>Set Initial PB</h2>
         <p class="modal-subtitle">{{ currentPopupExercise }}</p>
-        
-        <input 
-          type="number" 
-          v-model.number="popupInput" 
-          :placeholder="'Record (' + exerciseUnits[currentPopupExercise] + ')'"
-          class="weight-input modal-input"
-          @keyup.enter="saveInitialPb"
-        >
-        
+
+        <input type="number" v-model.number="popupInput"
+          :placeholder="'Record (' + exerciseUnits[currentPopupExercise] + ')'" class="weight-input modal-input"
+          @keyup.enter="saveInitialPb">
+
         <div class="modal-actions">
           <button @click="closePopup" class="btn-back">Cancel</button>
           <button @click="saveInitialPb" class="btn-primary">Save PB</button>
@@ -115,8 +89,9 @@
     <div v-if="showResetModal" class="modal-overlay" @click.self="closeResetModal">
       <div class="modal-content">
         <h2>Reset Record?</h2>
-        <p class="modal-subtitle alert-text">Are you sure you want to clear your {{ exerciseToReset }} PB? This cannot be undone.</p>
-        
+        <p class="modal-subtitle alert-text">Are you sure you want to clear your {{ exerciseToReset }} PB? This cannot
+          be undone.</p>
+
         <div class="modal-actions">
           <button @click="closeResetModal" class="btn-back">Cancel</button>
           <button @click="confirmReset" class="btn-danger">Yes, Reset</button>
@@ -127,8 +102,9 @@
     <div v-if="showDeleteModal" class="modal-overlay" @click.self="closeDeleteModal">
       <div class="modal-content">
         <h2>Remove Exercise?</h2>
-        <p class="modal-subtitle alert-text">Are you sure you want to completely remove "{{ exerciseToDelete }}"? This cannot be undone.</p>
-        
+        <p class="modal-subtitle alert-text">Are you sure you want to completely remove "{{ exerciseToDelete }}"? This
+          cannot be undone.</p>
+
         <div class="modal-actions">
           <button @click="closeDeleteModal" class="btn-back">Cancel</button>
           <button @click="confirmDelete" class="btn-danger">Yes, Remove</button>
@@ -140,7 +116,7 @@
       <div class="modal-content alert-modal">
         <h2>Keep Going!</h2>
         <p class="modal-subtitle alert-text">{{ alertMessage }}</p>
-        
+
         <div class="modal-actions center-actions">
           <button @click="closeAlertModal" class="btn-primary">Got It</button>
         </div>
@@ -151,7 +127,7 @@
       <div class="modal-content success-modal">
         <h2>🎉 New Record! 🎉</h2>
         <p class="modal-subtitle alert-text">{{ successMessage }}</p>
-        
+
         <div class="modal-actions center-actions">
           <button @click="closeSuccessModal" class="btn-primary">Awesome</button>
         </div>
@@ -164,7 +140,8 @@
 <script>
 export default {
   name: 'PersonalBests',
-  data() {
+  data()
+  {
     return {
       exercises: [
         "Bench Press",
@@ -211,7 +188,7 @@ export default {
       },
       newAttempts: {},
       recentlyBroken: null,
-      
+
       showCustomModal: false,
       customExerciseName: "",
       customExerciseUnit: "",
@@ -255,24 +232,33 @@ export default {
       ]
     }
   },
+
+  mounted()
+  {
+    this.fetchAllPersonalBests();
+  },
+
   methods: {
-    openCustomModal() {
+    openCustomModal()
+    {
       this.customExerciseName = "";
       this.customExerciseUnit = "";
       this.showCustomModal = true;
     },
-    closeCustomModal() {
+    closeCustomModal()
+    {
       this.showCustomModal = false;
     },
-    addCustomExercise() {
+    async addCustomExercise()
+    {
       const name = this.customExerciseName.trim();
       const unit = this.customExerciseUnit.trim();
-      
+
       if (!name || !unit) {
         this.openValidationErrorModal("Please provide both a name and a unit.");
         return;
       }
-      
+
       if (this.exercises.includes(name)) {
         this.openValidationErrorModal("This exercise already exists!");
         return;
@@ -283,37 +269,49 @@ export default {
       this.exerciseUnits[name] = unit;
       this.personalBests[name] = null;
       this.newAttempts[name] = null;
+      
+      await this.savePersonalBest(name);
+
 
       this.closeCustomModal();
     },
 
-    openValidationErrorModal(message) {
-        this.validationErrorMessage = message;
-        this.showValidationErrorModal = true;
+    openValidationErrorModal(message)
+    {
+      this.validationErrorMessage = message;
+      this.showValidationErrorModal = true;
     },
-    closeValidationErrorModal() {
-        this.validationErrorMessage = "";
-        this.showValidationErrorModal = false;
+    closeValidationErrorModal()
+    {
+      this.validationErrorMessage = "";
+      this.showValidationErrorModal = false;
     },
 
-    openPopup(exercise) {
+    openPopup(exercise)
+    {
       this.currentPopupExercise = exercise;
       this.popupInput = null;
       this.showPopup = true;
     },
-    closePopup() {
+    closePopup()
+    {
       this.showPopup = false;
       this.currentPopupExercise = null;
       this.popupInput = null;
     },
-    saveInitialPb() {
+    async saveInitialPb()
+    {
       if (this.popupInput && this.popupInput > 0) {
         this.personalBests[this.currentPopupExercise] = this.popupInput;
+
+        await this.savePersonalBest(this.currentPopupExercise);
+
         this.closePopup();
       }
     },
 
-    checkRecord(exercise) {
+    checkRecord(exercise)
+    {
       const attempt = this.newAttempts[exercise];
       const currentPb = this.personalBests[exercise];
 
@@ -325,19 +323,22 @@ export default {
       } else {
         this.triggerAlert(currentPb, exercise);
       }
-      
+
       this.newAttempts[exercise] = null;
     },
 
-    openResetModal(exercise) {
+    openResetModal(exercise)
+    {
       this.exerciseToReset = exercise;
       this.showResetModal = true;
     },
-    closeResetModal() {
+    closeResetModal()
+    {
       this.showResetModal = false;
       this.exerciseToReset = null;
     },
-    confirmReset() {
+    confirmReset()
+    {
       if (this.exerciseToReset) {
         this.personalBests[this.exerciseToReset] = null;
         this.newAttempts[this.exerciseToReset] = null;
@@ -345,59 +346,127 @@ export default {
       }
     },
 
-    openDeleteModal(exercise) {
+    openDeleteModal(exercise)
+    {
       this.exerciseToDelete = exercise;
       this.showDeleteModal = true;
     },
-    closeDeleteModal() {
+    closeDeleteModal()
+    {
       this.showDeleteModal = false;
       this.exerciseToDelete = null;
     },
-    confirmDelete() {
+    async confirmDelete()
+    {
       if (this.exerciseToDelete) {
         this.exercises = this.exercises.filter(e => e !== this.exerciseToDelete);
         this.customExercises = this.customExercises.filter(e => e !== this.exerciseToDelete);
-        
+
         delete this.exerciseUnits[this.exerciseToDelete];
         delete this.personalBests[this.exerciseToDelete];
         delete this.newAttempts[this.exerciseToDelete];
-        
+
+        // TODO
+        try {
+          await fetch(`/api/pb/${this.exerciseToDelete}`, {
+            method: 'DELETE'
+          })
+        } catch (error) {
+          console.error('Error deleting custom personal best type ', error)
+        }
+
         this.closeDeleteModal();
       }
     },
 
-    triggerCelebration(exercise, newRecord) {
+    triggerCelebration(exercise, newRecord)
+    {
       this.recentlyBroken = exercise;
-      
+
       const randomIndex = Math.floor(Math.random() * this.positiveComments.length);
       const praise = this.positiveComments[randomIndex];
       const unit = this.exerciseUnits[exercise];
-      
+
       this.successMessage = `${praise} Your new PB for ${exercise} is ${newRecord} ${unit}!`;
       this.showSuccessModal = true;
 
-      setTimeout(() => {
+      setTimeout(() =>
+      {
         this.recentlyBroken = null;
       }, 3500);
     },
 
-    closeSuccessModal() {
+    closeSuccessModal()
+    {
       this.showSuccessModal = false;
       this.successMessage = "";
     },
 
-    triggerAlert(currentPb, exercise) {
+    triggerAlert(currentPb, exercise)
+    {
       const randomIndex = Math.floor(Math.random() * this.encouragingComments.length);
       const messageTemplate = this.encouragingComments[randomIndex];
       const unit = this.exerciseUnits[exercise];
-      
+
       this.alertMessage = messageTemplate.replace('{pb}', `${currentPb} ${unit}`);
       this.showAlertModal = true;
     },
-    
-    closeAlertModal() {
+
+    closeAlertModal()
+    {
       this.showAlertModal = false;
       this.alertMessage = "";
+    },
+
+    async fetchAllPersonalBests()
+    {
+      try {
+        const response = await fetch('/api/pb');
+        const resData = await response.json();
+
+        for (const [name, entry] of Object.entries(resData)) {
+          let units = entry.units;
+          let value = entry.value;
+          let isCustom = entry.isCustom;
+
+          if (isCustom) {
+            this.exercises.push(name);
+            this.customExercises.push(name);
+          }
+
+          this.exerciseUnits[name] = units;
+          this.personalBests[name] = value;
+
+          console.log(entry);
+        }
+      } catch (error) {
+        console.error('Error: Failed to fetch personal best data. ', error);
+      }
+    },
+
+    async savePersonalBest(name)
+    {
+      let units = this.exerciseUnits[name];
+      let value = this.personalBests[name];
+
+      let data = {
+        name: name,
+        units: units,
+        value: value,
+        isCustom: this.customExercises.includes(name)
+      };
+
+      try {
+        const response = await fetch('/api/pb', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+      } catch (error) {
+        console.error("Error: Could not save personal bests. ", error);
+      }
     }
   }
 }
@@ -406,8 +475,8 @@ export default {
 <style scoped>
 .pb-page {
   max-width: 1200px;
-  width: 100%; 
-  box-sizing: border-box; 
+  width: 100%;
+  box-sizing: border-box;
   margin: 0 auto;
   padding: 20px 20px 50px 20px;
 }
@@ -416,7 +485,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 30px; 
+  gap: 30px;
   margin-bottom: 40px;
   border-bottom: 1px solid var(--border);
   padding-bottom: 20px;
@@ -437,7 +506,7 @@ export default {
 }
 
 .btn-back {
-  flex-shrink: 0; 
+  flex-shrink: 0;
   padding: 10px 15px;
   background-color: var(--code-bg);
   color: var(--text);
@@ -454,7 +523,7 @@ export default {
 
 .pb-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); 
+  grid-template-columns: repeat(3, 1fr);
   gap: 30px;
   width: 100%;
 }
@@ -469,11 +538,13 @@ export default {
   .pb-grid {
     grid-template-columns: 1fr;
   }
+
   .page-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 15px;
   }
+
   .header-actions {
     width: 100%;
     flex-direction: column-reverse;
@@ -490,7 +561,7 @@ export default {
   transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
-  min-height: 200px; 
+  min-height: 200px;
 }
 
 .card-header {
@@ -527,7 +598,8 @@ export default {
   opacity: 1;
 }
 
-.unset-state, .set-state {
+.unset-state,
+.set-state {
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -656,7 +728,7 @@ export default {
   text-align: center;
   width: 360px;
   max-width: 90vw;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
 }
 
 .modal-content h2 {
@@ -719,7 +791,14 @@ export default {
 }
 
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(-5px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 </style>
