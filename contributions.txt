@@ -1,0 +1,4 @@
+Ethan Medeiros
+    -Created Initial Site setup
+    -Created Calendar Page, DayView page, add an Exercise Page
+    -Edited text on pages to fix discrepancies in units
