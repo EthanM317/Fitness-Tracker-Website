@@ -46,6 +46,7 @@
             v-model="newExerciseName" 
             placeholder="Custom Exercise Name Here!"
             @input="clearError"
+            @keyup.enter ="saveCustomExercise"
           >
           <button type="button" @click="saveCustomExercise">Save</button>
           <button type="button" class="btn-cancel" @click="cancelCustomExercise">Cancel</button>
