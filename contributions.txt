@@ -7,3 +7,9 @@ Matthew Wyand
     - Created database + interface in server api
     - Integrated database into the frontend
     - Some UX cleanup (added press enter to submit most forms)
+
+Ellie Cunningham
+    - Added monthly dashboard on calendar view.
+    - Redesigned/reorganized calender view and day view to reduce empty space and make room for dashboard. 
+    - Added Navbar.
+    - CSS cleanup throughout all pages to fix inconsistencies and add light mode support.
