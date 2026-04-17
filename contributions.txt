@@ -2,4 +2,8 @@ Ethan Medeiros
     -Created Initial Site setup
     -Created Calendar Page, DayView page, add an Exercise Page
     -Edited text on pages to fix discrepancies in units
-git
+
+Matthew Wyand
+    - Created database + interface in server api
+    - Integrated database into the frontend
+    - Some UX cleanup (added press enter to submit most forms)
