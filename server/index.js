@@ -1,7 +1,10 @@
 const express = require('express');
 const cors = require('cors');
+const fs = require('fs').promises;
 const app = express();
 const port = 3000;
+
+const DATABASE_PATH = "./database/db.json";
 
 // Middleware
 app.use(cors());
@@ -11,7 +14,8 @@ app.use(express.static('public'));
 // In-memory storage for exercises
 let exercises = [];
 
-// Routes
+// -- Routes --
+// Get all exercises
 app.get('/api/exercises', (req, res) => {
   const { date } = req.query
   if (date) {
@@ -22,30 +26,83 @@ app.get('/api/exercises', (req, res) => {
   }
 });
 
-app.post('/api/exercises', (req, res) => {
+// Create a new exercise
+app.post('/api/exercises', async (req, res) => {
   const exercise = req.body;
   exercise.id = Date.now();
   exercises.push(exercise);
   res.json(exercise);
+
+  await writeDatabase();
+
+  console.log("Created new exercise: ", exercise)
 });
 
-app.put('/api/exercises/:id', (req, res) => {
+// Update exercise
+app.put('/api/exercises/:id', async (req, res) => {
   const id = parseInt(req.params.id);
   const index = exercises.findIndex(e => e.id === id);
   if (index !== -1) {
     exercises[index] = { ...exercises[index], ...req.body };
     res.json(exercises[index]);
+    console.log("Updated exercise ", index);
+
+    await writeDatabase();
   } else {
     res.status(404).json({ error: 'Exercise not found' });
   }
 });
 
-app.delete('/api/exercises/:id', (req, res) => {
+app.delete('/api/exercises/:id', async (req, res) => {
   const id = parseInt(req.params.id);
   exercises = exercises.filter(e => e.id !== id);
   res.json({ success: true });
+
+  await writeDatabase();
+
+  console.log("Deleted exercise ", id)
 });
 
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
+
+// -- "Database" functions --
+async function writeDatabase() {
+  // The whole database is just stored as a single JSON.
+  // This wouldn't scale very well, but it works for our simple app.
+  let data = {
+    exercises: exercises
+  };
+
+  await fs.writeFile(DATABASE_PATH, JSON.stringify(data));
+}
+
+async function readDatabase() {
+  // Try to read database. Don't proceed if it doesn't exist yet
+  let isDatabaseValid = await fileExists(DATABASE_PATH);
+  if (!isDatabaseValid) {
+    return;
+  }
+  
+  let data = JSON.parse(await fs.readFile(DATABASE_PATH));
+  if (data.exercises) {
+    exercises = data.exercises;
+  }
+}
+
+async function fileExists(path) {
+  try {
+    await fs.access(path);
+    return true;
+  } catch {
+    return false
+  }
+}
+
+async function startServer() {
+  await readDatabase();
+  
+  app.listen(port, () => {
+    console.log(`Server running at http://localhost:${port}`);
+  });
+}
+
+startServer();
