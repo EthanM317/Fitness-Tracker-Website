@@ -38,7 +38,7 @@
 
       <div class="form-group" v-if="isAddingCustom">
         <label for="customName">New Exercise Name:</label>
-          <div class="input-group">
+        <div class="input-group">
           <input 
             type="text" 
             id="customName" 
@@ -46,7 +46,7 @@
             v-model="newExerciseName" 
             placeholder="Custom Exercise Name Here!"
             @input="clearError"
-            @keyup.enter ="saveCustomExercise"
+            @keyup.enter="saveCustomExercise"
           >
           <button type="button" @click="saveCustomExercise">Save</button>
           <button type="button" class="btn-cancel" @click="cancelCustomExercise">Cancel</button>
@@ -57,10 +57,12 @@
         <label for="sets">Sets:</label>
         <input type="number" id="sets" v-model.number="form.sets" min="0" required>
       </div>
+
       <div class="form-group">
         <label for="reps">Reps or Duration (mins):</label>
         <input type="number" id="reps" v-model.number="form.reps" min="0" required>
       </div>
+
       <div class="form-group">
         <label for="weight">Weight (lbs):</label>
         <input type="number" id="weight" v-model.number="form.weight" min="0" step="5" required>
@@ -73,6 +75,10 @@
       
       <button type="submit" v-if="!isAddingCustom">Add Exercise</button>
     </form>
+
+    <div v-if="pbToast" class="pb-toast">
+      🏆 New PB! {{ pbToast.name }} — {{ pbToast.weight }} lbs
+    </div>
   </div>
 </template>
 
@@ -88,32 +94,35 @@ export default {
   data() {
     return {
       exercisePresets: {
-        "Bench Press":    { sets: 3, reps: 10, weight: 135 },
-        "Bicep Curls":    { sets: 3, reps: 12, weight: 25 },
-        "Cycling":        { sets: 1, reps: 1,  weight: 0 },
-        "Deadlift":       { sets: 3, reps: 5,  weight: 225 },
-        "Plank":          { sets: 2, reps: 1,  weight: 0 },
-        "Pull-ups":       { sets: 3, reps: 10, weight: 0 },
-        "Push-ups":       { sets: 5, reps: 20, weight: 0 },
-        "Running":        { sets: 1, reps: 1,  weight: 0 },
+        "Bench Press": { sets: 3, reps: 10, weight: 135 },
+        "Bicep Curls": { sets: 3, reps: 12, weight: 25 },
+        "Cycling": { sets: 1, reps: 1, weight: 0 },
+        "Deadlift": { sets: 3, reps: 5, weight: 225 },
+        "Plank": { sets: 2, reps: 1, weight: 0 },
+        "Pull-ups": { sets: 3, reps: 10, weight: 0 },
+        "Push-ups": { sets: 5, reps: 20, weight: 0 },
+        "Running": { sets: 1, reps: 1, weight: 0 },
         "Shoulder Press": { sets: 3, reps: 10, weight: 45 },
-        "Squats":         { sets: 3, reps: 8,  weight: 185 },
-        "Tricep Dips":    { sets: 3, reps: 12, weight: 0 },
-        "Walking":        { sets: 1, reps: 1,  weight: 0 }
+        "Squats": { sets: 3, reps: 8, weight: 185 },
+        "Tricep Dips": { sets: 3, reps: 12, weight: 0 },
+        "Walking": { sets: 1, reps: 1, weight: 0 }
       },
-      
-      customExercises: [], 
-      isAddingCustom: false, 
-      newExerciseName: '', 
+
+      customExercises: [],
+      isAddingCustom: false,
+      newExerciseName: '',
       form: {
         name: '',
         sets: 0,
         reps: 0,
         weight: 0,
         date: this.date || new Date().toLocaleDateString('en-CA')
-      }
+      },
+      pbToast: null,
+      pbToastTimer: null
     }
   },
+
   computed: {
     defaultExercises() {
       return Object.keys(this.exercisePresets).sort();
@@ -135,24 +144,23 @@ export default {
 
   watch: {
     date(newDate) {
-      this.form.date = newDate
+      this.form.date = newDate;
     }
   },
+
   mounted() {
-    // TODO: The page displays before the values come in from the server.
-    // Maybe consider having a loading icon?
     this.fetchCustomExerciseTypes();
   },
+
   methods: {
     handleSelectChange() {
       if (this.form.name === 'ADD_NEW') {
         this.isAddingCustom = true;
-        this.form.name = ''; 
+        this.form.name = '';
         this.form.sets = 0;
         this.form.reps = 0;
         this.form.weight = 0;
-      } 
-      else if (this.exercisePresets[this.form.name]) {
+      } else if (this.exercisePresets[this.form.name]) {
         const preset = this.exercisePresets[this.form.name];
         this.form.sets = preset.sets;
         this.form.reps = preset.reps;
@@ -164,31 +172,31 @@ export default {
       const name = this.newExerciseName.trim();
       const inputEl = this.$refs.customNameInput;
 
-      if (!name) return; 
+      if (!name) return;
+
       const searchName = name.toLowerCase();
-      const isDuplicate = 
+      const isDuplicate =
         this.defaultExercises.some(ex => ex.toLowerCase() === searchName) ||
         this.customExercises.some(ex => ex.toLowerCase() === searchName);
 
       if (isDuplicate) {
         inputEl.setCustomValidity(`An exercise named "${name}" already exists.`);
         inputEl.reportValidity();
-        return; 
+        return;
       }
-      
+
       this.customExercises.push(name);
+
       try {
-        const response = await fetch('/api/custom-exercise-types', {
+        await fetch('/api/custom-exercise-types', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(this.customExercises)
         });
       } catch (error) {
-        console.error('Error: Could not add custom exercise type. ', error);
+        console.error('Error: Could not add custom exercise type.', error);
       }
-      
+
       this.form.name = name;
       this.isAddingCustom = false;
       this.newExerciseName = '';
@@ -208,25 +216,87 @@ export default {
       this.newExerciseName = '';
       this.form.name = '';
     },
-    
+
     async deleteCustomExercise() {
       let deleteName = this.form.name;
 
       try {
-        const response = await fetch(`/api/custom-exercise-types/${deleteName}`, {
+        await fetch(`/api/custom-exercise-types/${deleteName}`, {
           method: 'DELETE'
         });
       } catch (error) {
-        console.error('Error: Failed to delete custom exercise type. ', error);
+        console.error('Error: Failed to delete custom exercise type.', error);
       }
-      
+
       this.customExercises = this.customExercises.filter(ex => ex !== deleteName);
-      this.form.name = ''; 
+      this.form.name = '';
     },
-    
-    submitForm() {
-      this.$emit('add-exercise', { ...this.form })
-      this.resetForm()
+
+    async submitForm() {
+      const exerciseData = { ...this.form };
+      this.$emit('add-exercise', exerciseData);
+
+      if (exerciseData.weight > 0 && exerciseData.name) {
+        await this.checkAndUpdatePb(exerciseData.name, exerciseData.weight);
+      }
+
+      this.resetForm();
+    },
+
+    async checkAndUpdatePb(exerciseName, weight) {
+      try {
+        const response = await fetch(`/api/pb?name=${encodeURIComponent(exerciseName)}`);
+
+        let pbData = null;
+
+        if (response.ok) {
+          pbData = await response.json();
+        }
+
+        if (!pbData || pbData.value === undefined || pbData.value === null) {
+          await fetch('/api/pb', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: exerciseName,
+              units: 'lbs',
+              value: weight,
+              isCustom: false
+            })
+          });
+
+          this.showPbToast(exerciseName, weight);
+          return;
+        }
+
+        // Existing PB → compare
+        if (weight > pbData.value) {
+          await fetch('/api/pb', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: exerciseName,
+              units: pbData.units || 'lbs',
+              value: weight,
+              isCustom: pbData.isCustom || false
+            })
+          });
+
+          this.showPbToast(exerciseName, weight);
+        }
+
+      } catch (error) {
+        console.error('Error checking/updating PB:', error);
+      }
+    },
+
+    showPbToast(name, weight) {
+      if (this  .pbToastTimer) clearTimeout(this.pbToastTimer);
+      this.pbToast = { name, weight };
+      this.pbToastTimer = setTimeout(() => {
+        this.pbToast = null;
+        this.pbToastTimer = null;
+      }, 3500);
     },
 
     resetForm() {
@@ -236,7 +306,7 @@ export default {
         reps: 0,
         weight: 0,
         date: this.date || new Date().toLocaleDateString('en-CA')
-      }
+      };
     },
 
     async fetchCustomExerciseTypes() {
@@ -244,13 +314,12 @@ export default {
         const response = await fetch('/api/custom-exercise-types');
         this.customExercises = await response.json();
       } catch (error) {
-        console.error('Error: Failed to fetch custom exercise types. ', error);
+        console.error('Error: Failed to fetch custom exercise types.', error);
       }
     }
   }
 }
 </script>
-
 <style scoped>
 .exercise-form {
   margin: 15px;
@@ -336,11 +405,17 @@ button:hover {
   text-decoration: none;
   font-weight: bold;
   font-size: 0.95em;
-  transition: opacity 0.2s ease;
 }
 
-.info-link:hover {
-  text-decoration: underline;
-  opacity: 0.8;
+.pb-toast {
+  position: fixed;
+  bottom: 30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--green-1);
+  color: #fff;
+  font-weight: bold;
+  padding: 12px 24px;
+  border-radius: 6px;
 }
 </style>
