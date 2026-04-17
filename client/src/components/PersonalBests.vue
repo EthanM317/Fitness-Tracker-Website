@@ -18,7 +18,7 @@
           </button>
         </div>
 
-        <div v-if="personalBests[exercise] === null" class="unset-state">
+        <div v-if="personalBests[exercise] == null" class="unset-state">
           <p>No record set yet.</p>
           <button @click="openPopup(exercise)" class="btn-primary">Set Initial PB</button>
         </div>
@@ -42,16 +42,13 @@
       </section>
     </div>
 
+    <!-- all modals (unchanged) -->
     <div v-if="showCustomModal" class="modal-overlay" @click.self="closeCustomModal">
       <div class="modal-content">
         <h2>Add Custom Exercise</h2>
         <p class="modal-subtitle alert-text" style="margin-bottom: 20px;">Track something new</p>
-
-        <input type="text" v-model="customExerciseName" placeholder="Exercise Name (e.g. Rowing)"
-          class="weight-input modal-input" @keyup.enter="addCustomExercise">
-        <input type="text" v-model="customExerciseUnit" placeholder="Units (e.g. km, mins, reps)"
-          class="weight-input modal-input" @keyup.enter="addCustomExercise">
-
+        <input type="text" v-model="customExerciseName" placeholder="Exercise Name (e.g. Rowing)" class="weight-input modal-input" @keyup.enter="addCustomExercise">
+        <input type="text" v-model="customExerciseUnit" placeholder="Units (e.g. km, mins, reps)" class="weight-input modal-input" @keyup.enter="addCustomExercise">
         <div class="modal-actions">
           <button @click="closeCustomModal" class="btn-back">Cancel</button>
           <button @click="addCustomExercise" class="btn-primary">Add to Grid</button>
@@ -63,7 +60,6 @@
       <div class="modal-content">
         <h2>Error!</h2>
         <p class="modal-subtitle alert-text" style="margin-bottom: 20px;">{{ validationErrorMessage }}</p>
-
         <div class="modal-actions center-actions">
           <button @click="closeValidationErrorModal" class="btn-primary">Okay</button>
         </div>
@@ -74,11 +70,7 @@
       <div class="modal-content">
         <h2>Set Initial PB</h2>
         <p class="modal-subtitle">{{ currentPopupExercise }}</p>
-
-        <input type="number" v-model.number="popupInput"
-          :placeholder="'Record (' + exerciseUnits[currentPopupExercise] + ')'" class="weight-input modal-input"
-          @keyup.enter="saveInitialPb">
-
+        <input type="number" v-model.number="popupInput" :placeholder="'Record (' + exerciseUnits[currentPopupExercise] + ')'" class="weight-input modal-input" @keyup.enter="saveInitialPb">
         <div class="modal-actions">
           <button @click="closePopup" class="btn-back">Cancel</button>
           <button @click="saveInitialPb" class="btn-primary">Save PB</button>
@@ -89,9 +81,7 @@
     <div v-if="showResetModal" class="modal-overlay" @click.self="closeResetModal">
       <div class="modal-content">
         <h2>Reset Record?</h2>
-        <p class="modal-subtitle alert-text">Are you sure you want to clear your {{ exerciseToReset }} PB? This cannot
-          be undone.</p>
-
+        <p class="modal-subtitle alert-text">Are you sure you want to clear your {{ exerciseToReset }} PB? This cannot be undone.</p>
         <div class="modal-actions">
           <button @click="closeResetModal" class="btn-back">Cancel</button>
           <button @click="confirmReset" class="btn-danger">Yes, Reset</button>
@@ -102,9 +92,7 @@
     <div v-if="showDeleteModal" class="modal-overlay" @click.self="closeDeleteModal">
       <div class="modal-content">
         <h2>Remove Exercise?</h2>
-        <p class="modal-subtitle alert-text">Are you sure you want to completely remove "{{ exerciseToDelete }}"? This
-          cannot be undone.</p>
-
+        <p class="modal-subtitle alert-text">Are you sure you want to completely remove "{{ exerciseToDelete }}"? This cannot be undone.</p>
         <div class="modal-actions">
           <button @click="closeDeleteModal" class="btn-back">Cancel</button>
           <button @click="confirmDelete" class="btn-danger">Yes, Remove</button>
@@ -116,7 +104,6 @@
       <div class="modal-content alert-modal">
         <h2>Keep Going!</h2>
         <p class="modal-subtitle alert-text">{{ alertMessage }}</p>
-
         <div class="modal-actions center-actions">
           <button @click="closeAlertModal" class="btn-primary">Got It</button>
         </div>
@@ -127,7 +114,6 @@
       <div class="modal-content success-modal">
         <h2>🎉 New Record! 🎉</h2>
         <p class="modal-subtitle alert-text">{{ successMessage }}</p>
-
         <div class="modal-actions center-actions">
           <button @click="closeSuccessModal" class="btn-primary">Awesome</button>
         </div>
@@ -236,9 +222,19 @@ export default {
   mounted()
   {
     this.fetchAllPersonalBests();
+    // Listen for changes from ExerciseForm
+    window.addEventListener('exercise-list-changed', this.refreshData);
+  },
+
+  beforeDestroy() {
+    window.removeEventListener('exercise-list-changed', this.refreshData);
   },
 
   methods: {
+    refreshData() {
+      this.fetchAllPersonalBests();
+    },
+
     openCustomModal()
     {
       this.customExerciseName = "";
@@ -264,16 +260,31 @@ export default {
         return;
       }
 
+      // 1. Update local arrays using $set for reactivity
       this.exercises.push(name);
       this.customExercises.push(name);
-      this.exerciseUnits[name] = unit;
-      this.personalBests[name] = null;
-      this.newAttempts[name] = null;
+      this.$set(this.exerciseUnits, name, unit);
+      this.$set(this.personalBests, name, null);
+      this.$set(this.newAttempts, name, null);
       
+      // 2. Save PB entry (null value)
       await this.savePersonalBest(name);
-
+      
+      // 3. Also update the custom exercise types list (so ExerciseForm dropdown sees it)
+      try {
+        await fetch('/api/custom-exercise-types', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(this.customExercises)
+        });
+      } catch (error) {
+        console.error('Error updating custom exercise types:', error);
+      }
 
       this.closeCustomModal();
+
+      // 4. Notify ExerciseForm component to refresh
+      window.dispatchEvent(new CustomEvent('exercise-list-changed'));
     },
 
     openValidationErrorModal(message)
@@ -302,10 +313,8 @@ export default {
     async saveInitialPb()
     {
       if (this.popupInput && this.popupInput > 0) {
-        this.personalBests[this.currentPopupExercise] = this.popupInput;
-
+        this.$set(this.personalBests, this.currentPopupExercise, this.popupInput);
         await this.savePersonalBest(this.currentPopupExercise);
-
         this.closePopup();
       }
     },
@@ -318,16 +327,14 @@ export default {
       if (!attempt || attempt <= 0) return;
 
       if (attempt > currentPb) {
-        this.personalBests[exercise] = attempt;
+        this.$set(this.personalBests, exercise, attempt);
         this.triggerCelebration(exercise, attempt);
-
         await this.savePersonalBest(exercise);
-
       } else {
         this.triggerAlert(currentPb, exercise);
       }
 
-      this.newAttempts[exercise] = null;
+      this.$set(this.newAttempts, exercise, null);
     },
 
     openResetModal(exercise)
@@ -343,11 +350,9 @@ export default {
     async confirmReset()
     {
       if (this.exerciseToReset) {
-        this.personalBests[this.exerciseToReset] = null;
-        this.newAttempts[this.exerciseToReset] = null;
-
+        this.$set(this.personalBests, this.exerciseToReset, null);
+        this.$set(this.newAttempts, this.exerciseToReset, null);
         await this.savePersonalBest(this.exerciseToReset);
-
         this.closeResetModal();
       }
     },
@@ -365,6 +370,7 @@ export default {
     async confirmDelete()
     {
       if (this.exerciseToDelete) {
+        // 1. Remove from local arrays
         this.exercises = this.exercises.filter(e => e !== this.exerciseToDelete);
         this.customExercises = this.customExercises.filter(e => e !== this.exerciseToDelete);
 
@@ -372,16 +378,30 @@ export default {
         delete this.personalBests[this.exerciseToDelete];
         delete this.newAttempts[this.exerciseToDelete];
 
-        // TODO
+        // 2. Delete PB entry from backend
         try {
           await fetch(`/api/pb/${this.exerciseToDelete}`, {
             method: 'DELETE'
-          })
+          });
         } catch (error) {
-          console.error('Error deleting custom personal best type ', error)
+          console.error('Error deleting custom personal best type ', error);
+        }
+
+        // 3. Update custom exercise types list
+        try {
+          await fetch('/api/custom-exercise-types', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(this.customExercises)
+          });
+        } catch (error) {
+          console.error('Error updating custom exercise types after delete:', error);
         }
 
         this.closeDeleteModal();
+
+        // 4. Notify ExerciseForm component to refresh
+        window.dispatchEvent(new CustomEvent('exercise-list-changed'));
       }
     },
 
@@ -430,20 +450,37 @@ export default {
         const response = await fetch('/api/pb');
         const resData = await response.json();
 
+        // Reset custom exercises array before rebuilding
+        this.customExercises = [];
+
         for (const [name, entry] of Object.entries(resData)) {
           let units = entry.units;
           let value = entry.value;
           let isCustom = entry.isCustom;
 
           if (isCustom) {
-            this.exercises.push(name);
-            this.customExercises.push(name);
+            if (!this.customExercises.includes(name)) {
+              this.customExercises.push(name);
+            }
+            // Ensure custom exercises appear in the grid array
+            if (!this.exercises.includes(name)) {
+              this.exercises.push(name);
+            }
           }
 
-          this.exerciseUnits[name] = units;
-          this.personalBests[name] = value;
+          // Use $set so Vue tracks these as reactive properties
+          this.$set(this.exerciseUnits, name, units);
+          this.$set(this.personalBests, name, value !== undefined ? value : null);
+          if (this.newAttempts[name] === undefined) {
+            this.$set(this.newAttempts, name, null);
+          }
+        }
 
-          console.log(entry);
+        // Ensure all default exercises have at least null in personalBests
+        for (const ex of this.exercises) {
+          if (this.personalBests[ex] === undefined) {
+            this.$set(this.personalBests, ex, null);
+          }
         }
       } catch (error) {
         console.error('Error: Failed to fetch personal best data. ', error);
@@ -479,6 +516,7 @@ export default {
 </script>
 
 <style scoped>
+/* (original styles unchanged – keep as in the original) */
 .pb-page {
   max-width: 1200px;
   width: 100%;
